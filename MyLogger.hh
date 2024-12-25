@@ -12,6 +12,8 @@
 #include <iomanip>
 #include <time.h>
 #include <format>
+#include <condition_variable>
+#include <filesystem>
 
 namespace MyLogger{
 
@@ -25,17 +27,13 @@ enum class LogLevel {
 class LogEntry{
 public:
   std::stringstream content;
+
+//TODO: Lots of
 };
 
 class Logger {
 public:
-  Logger(std::string program_name, std::string dir, int max_size): _dir(dir), _program_name(program_name) { //max size in MB
-    _exit = false;
-    _max_size = max_size*1048576;
-    //TODO: check if dir exists, if not create one
-    std::cout << "starting writer thread" << std::endl;
-    _writer = std::thread(&Logger::writerFunc, this);
-  }
+  Logger(std::string program_name, std::string dir, int max_size);
 
   ~Logger();
 
@@ -45,6 +43,8 @@ public:
 private:
   void writerFunc();
 
+  void ensureDir(std::string dir);
+
   std::queue<std::string> _buffer;
   std::string _dir;
   long long _max_size;
@@ -53,6 +53,7 @@ private:
   std::mutex _mtx;
   std::ofstream _file_stream;
   std::string _program_name;
+  std::condition_variable _cv;
 };
 
 }
