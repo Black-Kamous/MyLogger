@@ -23,6 +23,12 @@ logger类和logentry分离，又叫做前后端分离，前者负责将log（str
 ## 格式化
 
 
+### std::format的使用
+
+1. 需要c++20以上，g++在这里使用了版本13
+2. format pattern必须是编译时确定的，因此必须是字面量或constexpr函数返回的std::string，后者麻烦且可读性差。
+
+
 
 ## 宏helpers
 
