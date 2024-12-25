@@ -32,7 +32,7 @@ test : $(TEST_TARGET)
 	LD_LIBRARY_PATH=. $(TEST_TARGET)
 
 clean : 
-	rm -rf $(OBJS) $(TEST_OBJS) $(TARGET)
+	rm -rf $(OBJS) $(TEST_OBJS) $(TARGET) $(TEST_TARGET)
 
 clear_logs :
 	rm -rf tests/logs/*
