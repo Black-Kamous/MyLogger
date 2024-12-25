@@ -32,10 +32,14 @@ public:
   Logger(std::string program_name, std::string dir, int max_size): _dir(dir), _program_name(program_name) { //max size in MB
     _exit = false;
     _max_size = max_size*1048576;
+    //TODO: check if dir exists, if not create one
+    std::cout << "starting writer thread" << std::endl;
     _writer = std::thread(&Logger::writerFunc, this);
   }
 
   ~Logger();
+
+  void Log(const std::string& content);
 
 
 private:
@@ -52,5 +56,7 @@ private:
 };
 
 }
+
+// helpers
 
 #endif

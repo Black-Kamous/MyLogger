@@ -2,7 +2,8 @@ CC 			= g++-13
 LD			= g++-13
 CXXFLAGS 	= -O0 -Wall -std=c++20 -fPIC -shared
 LDFLAGS		= -lstdc++ -fPIC -shared -pthread
-TEST_LDFLAGS= -lstdc++
+TEST_LDFLAGS= -lstdc++ -L.
+TEST_LDLIBS = -lmylogger
 
 SOURCES 	= $(wildcard *.cc)
 TEST_SOURCES= $(wildcard tests/*.cc)
@@ -10,8 +11,8 @@ TEST_SOURCES= $(wildcard tests/*.cc)
 OBJS 		= $(patsubst %.cc, %.o, $(SOURCES))
 TEST_OBJS 	= $(patsubst %.cc, %.o, $(TEST_SOURCES))
 
-TARGET		= mylogger.so
-TEST_TARGET = main
+TARGET		= libmylogger.so
+TEST_TARGET = tests/main
 
 %.o : %.cc
 	$(CC) $(CXXFLAGS) -c $< -o $@
@@ -22,15 +23,16 @@ tests/%.o : tests/%.cc
 $(TARGET) : $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -o $(TARGET)
 
-$(TEST_TARGET) : $(TEST_OBJS)
-	$(LD) $(TEST_LDFLAGS) $(TEST_OBJS) -o $(TEST_TARGET)
+$(TEST_TARGET) : $(TEST_OBJS) $(TARGET)
+	$(LD) $(TEST_LDFLAGS) $(TEST_OBJS) $(TEST_LDLIBS) -o $(TEST_TARGET)
 
-tests : $(TEST_OBJS)
+all : $(TEST_TARGET) $(TARGET)
 
-all : $(TARGET) tests
+test : $(TEST_TARGET)
+	LD_LIBRARY_PATH=. $(TEST_TARGET)
 
 clean : 
 	rm -rf $(OBJS) $(TEST_OBJS) $(TARGET)
 
-.PHONY : all tests clean
+.PHONY : all test clean
 
