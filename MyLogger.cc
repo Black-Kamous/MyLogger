@@ -2,20 +2,18 @@
 
 namespace MyLogger {
 
-Logger::Logger(std::string program_name, std::string dir, int max_size): _dir(dir), _program_name(program_name) { //max size in MB
+Logger::Logger() { //max size in MB
     _exit = false;
-    _max_size = max_size*1048576;
-    ensureDir(_dir);
-    std::cout << "starting writer thread" << std::endl;
     _writer = std::thread(&Logger::writerFunc, this);
+    std::cout << "Logger Inited" << std::endl;
 };
 
 Logger::~Logger(){
   _exit = true;
-  std::cout << "Logger deleted" << std::endl;
   _cv.notify_all();
   _writer.join();
   _file_stream.close();
+  std::cout << "Logger deleted" << std::endl;
 };
 
 void Logger::Log(const std::string& content) {
@@ -24,9 +22,13 @@ void Logger::Log(const std::string& content) {
   _cv.notify_all();
 };
 
+Logger &Logger::getInstance() {
+  static Logger instance;
+  return instance;
+};
+
 void Logger::writerFunc(){
   int bytes = 0;
-  std::cout << "writer thread started" << std::endl;
   while(true){
     std::unique_lock<std::mutex> lck(_mtx);
     _cv.wait(lck, [this](){return (!_buffer.empty() || _exit);});
@@ -38,7 +40,6 @@ void Logger::writerFunc(){
       std::string timestr = std::format("{:02}_{:02}_{:02}_{:02}_{:02}", tm.tm_mon+1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
       std::string file_name = std::format("{}-LOG-{}.log", _program_name, timestr);
       file_name = _dir + file_name;
-      std::cout << file_name << std::endl;
       _file_stream.open(file_name, std::ios::out | std::ios::app);
       if(!_file_stream.is_open()){std::cout << "Cannot open log file" << std::endl; break;}
     }
@@ -68,6 +69,24 @@ void Logger::ensureDir(std::string dir) {
     std::filesystem::remove(dirpath);
     std::filesystem::create_directory(dirpath);
   }
-}
+};
+
+void Logger::setDir(std::string dir) {
+  _dir = dir;
+  ensureDir(_dir);
+};
+
+void Logger::setMaxSize(int max_size) {
+  _max_size = max_size*1048576;
+};
+
+void Logger::setProgramName(std::string prog_name) {
+  _program_name = prog_name;
+};
+
+void LogEntry::produce() {
+  Logger &logger = Logger::getInstance();
+  logger.Log(content.str());
+};
 
 } // namespace MyLogger

@@ -1,11 +1,11 @@
 CC 			= g++-13
 LD			= g++-13
 CXXFLAGS 	= -O0 -Wall -std=c++20 -fPIC -shared
-LDFLAGS		= -lstdc++ -fPIC -shared -pthread
+LDFLAGS		= -lstdc++ -std=c++20 -fPIC -shared -pthread
 TEST_LDFLAGS= -lstdc++ -L.
 TEST_LDLIBS = -lmylogger
 
-SOURCES 	= $(wildcard *.cc)
+SOURCES 	= $(wildcard *.cc *.hh)
 TEST_SOURCES= $(wildcard tests/*.cc)
 
 OBJS 		= $(patsubst %.cc, %.o, $(SOURCES))
@@ -16,7 +16,7 @@ TEST_TARGET := tests/main
 
 all : $(TARGET) $(TEST_TARGET)
 
-%.o : %.cc
+%.o : %.cc %.hh
 	$(CC) $(CXXFLAGS) -c $< -o $@
 
 tests/%.o : tests/%.cc
