@@ -86,7 +86,29 @@ void Logger::setProgramName(std::string prog_name) {
 
 void LogEntry::produce() {
   Logger &logger = Logger::getInstance();
-  logger.Log(content.str());
+  auto now = std::chrono::system_clock::now();
+  std::stringstream id;
+  id << std::this_thread::get_id();
+  std::string lev;
+  switch(_ll){
+    case LogLevel::ERROR:
+      lev = "ERROR";
+      break;
+    case LogLevel::WARNING:
+      lev = "WARNING";
+      break;
+    case LogLevel::INFO:
+      lev = "INFO";
+      break;
+    case LogLevel::DEBUG:
+      lev = "DEBUG";
+      break;
+  }
+  std::string logl = std::format("[{}] [thread {}] [{}] {} at {}:{}:{}", now, id.str(), lev, content.str(), _file, _func, _line);
+  logger.Log(logl);
 };
+
+LogEntry::LogEntry(LogLevel ll, const char *file, const char *func,
+                   uint32_t line) {_ll = ll;_file = file; _func = func; _line = line;};
 
 } // namespace MyLogger

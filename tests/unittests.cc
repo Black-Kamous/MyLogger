@@ -106,6 +106,13 @@ void metap_test(){
   std::cout << "HasPrint " << le.content.str() <<std::endl;
 }
 
+void full_basic_test(){
+  __LOG(LogLevel::ERROR, __FILE__, __FUNCTION__, __LINE__) << "Error message";
+  LOG(LogLevel::WARNING) << 122;
+  LOG(LogLevel::INFO) << 12.333;
+  LOG(LogLevel::DEBUG) << 'm';
+}
+
 int main(){
   Logger& logger = Logger::getInstance();
   logger.setDir("/root/MyLogger-cpp/tests/logs/");
@@ -121,6 +128,8 @@ int main(){
   // TIMING_CALL(slow_logging, "staying in same log file", std::chrono::seconds);
 
   TIMING_CALL(metap_test, "testing meta-programming code's correctness", std::chrono::seconds);
+
+  TIMING_CALL(full_basic_test, "final calling procedure", std::chrono::seconds);
   
   return 0;
 }

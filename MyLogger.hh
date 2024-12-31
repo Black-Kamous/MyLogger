@@ -44,7 +44,12 @@ enum class LogLevel {
 class LogEntry{
 public:
   LogEntry() = default;
-  ~LogEntry() {std::cout << "LogEntry deleted" << std::endl;}
+  LogEntry(LogLevel ll, 
+          const char* file,
+          const char* func,
+          uint32_t line);
+
+  ~LogEntry() {this->produce(); std::cout << "LogEntry deleted" << std::endl;}
 
   // enable_if 作为模板参数，如果结果为false_type则无法完成实例化
   template <class V, typename = std::enable_if_t<has_ostream_operator<V>::value>>
@@ -53,24 +58,27 @@ public:
   };
 
   // 当上面模板无法实例化时，激活下面的模板函数
-  // template <class V> //这种也可
-  // typename std::enable_if<!has_ostream_operator<V>::value, std::ostream&>::type operator<<(V item) {
-  //     //static_assert(has_ostream_operator<V>::value, "Type does not have an ostream operator<< defined.");
-  //     return content << "[Not Stringifiable]" << " ";
-  // }
-  template <class V, typename...>
-  std::ostream& operator<<(V item){
-    return (content << "[Not Stringifiable]" << " ");
-  };
-
+  template <class V>
+  typename std::enable_if<!has_ostream_operator<V>::value, std::ostream&>::type operator<<(V item) {
+      //static_assert(has_ostream_operator<V>::value, "Type does not have an ostream operator<< defined.");
+      return content << "[Not Stringifiable]" << " ";
+  }
   
   void produce();
 
   std::stringstream content;
 private:
+  LogLevel _ll;
+  std::string _file;
+  std::string _func;
+  uint32_t _line;
 
 //TODO: Lots of
 };
+
+#define __LOG(level, file, func, line) LogEntry(level, file, func, line)
+
+#define LOG(level) __LOG(level, __FILE__, __FUNCTION__, __LINE__)
 
 class Logger {
 public:
